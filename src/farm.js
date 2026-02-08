@@ -218,15 +218,18 @@ async function findBestSeed() {
     }
 
     // 按经验效率（exp/hour）排序，选最优种子
+    // 只使用 102 开头的正常植物数据计算效率，排除 202 等特殊版本
     const FERTILIZER_SPEED = 30;
     const OPERATION_TIME = 15;
     available.sort((a, b) => {
         const plantA = getPlantBySeedId(a.seedId);
         const plantB = getPlantBySeedId(b.seedId);
-        const growA = plantA ? getPlantGrowTime(plantA.id) : 0;
-        const growB = plantB ? getPlantGrowTime(plantB.id) : 0;
-        const expA = plantA ? (plantA.exp || 0) + 1 : 0;
-        const expB = plantB ? (plantB.exp || 0) + 1 : 0;
+        const useA = plantA && String(plantA.id).startsWith('102') ? plantA : null;
+        const useB = plantB && String(plantB.id).startsWith('102') ? plantB : null;
+        const growA = useA ? getPlantGrowTime(useA.id) : 9999;
+        const growB = useB ? getPlantGrowTime(useB.id) : 9999;
+        const expA = useA ? (useA.exp || 0) + 1 : 0;
+        const expB = useB ? (useB.exp || 0) + 1 : 0;
         const cycleA = Math.max(growA - FERTILIZER_SPEED, 1) + OPERATION_TIME;
         const cycleB = Math.max(growB - FERTILIZER_SPEED, 1) + OPERATION_TIME;
         const effA = cycleA > 0 ? expA / cycleA : 0;
