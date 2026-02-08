@@ -9,7 +9,7 @@ const EventEmitter = require('events');
 // 现有模块
 const { CONFIG } = require('../src/config');
 const { loadProto } = require('../src/proto');
-const { connect, cleanup, getWs, getUserState, networkEvents } = require('../src/network');
+const { connect, cleanup, resetState, getWs, getUserState, networkEvents } = require('../src/network');
 const { startFarmCheckLoop, stopFarmCheckLoop, setOverrideSeedId } = require('../src/farm');
 const { startFriendCheckLoop, stopFriendCheckLoop } = require('../src/friend');
 const { initTaskSystem, cleanupTaskSystem } = require('../src/task');
@@ -69,6 +69,9 @@ function botConnect(code, platform) {
     isConnecting = true;
     let resolved = false;
 
+    // 重置网络层状态，确保旧连接不干扰
+    resetState();
+
     CONFIG.platform = platform || store.get().platform || 'qq';
     setStatusPlatform(CONFIG.platform);
     initStatusBar();
@@ -108,6 +111,10 @@ function botConnect(code, platform) {
         isConnected = false;
         isConnecting = false;
         botEvents.emit('status-update', { connected: false });
+        if (!resolved) {
+          resolved = true;
+          resolve({ success: false, error: '连接已关闭' });
+        }
       });
       ws.on('error', (err) => {
         isConnected = false;
@@ -137,10 +144,9 @@ function botDisconnect() {
   cleanupTaskSystem();
   stopSellLoop();
   cleanupStatusBar();
-  cleanup();
-  const ws = getWs();
-  if (ws) ws.close();
+  resetState();
   isConnected = false;
+  isConnecting = false;
   botEvents.emit('status-update', { connected: false });
   return { success: true };
 }

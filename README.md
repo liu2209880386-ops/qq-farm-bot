@@ -84,6 +84,7 @@ npm run cli -- --code <你的code> --interval 30 --friend-interval 5
 ```
 
 参数说明：
+
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
 | `--code` | 小程序登录凭证（必需） | - |

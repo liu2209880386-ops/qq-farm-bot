@@ -450,10 +450,27 @@ function cleanup() {
     pendingCallbacks.clear();
 }
 
+function resetState() {
+    cleanup();
+    if (ws) {
+        try { ws.removeAllListeners(); ws.close(); } catch (e) {}
+        ws = null;
+    }
+    clientSeq = 1;
+    serverSeq = 0;
+    userState.gid = 0;
+    userState.name = '';
+    userState.level = 0;
+    userState.gold = 0;
+    userState.exp = 0;
+    lastHeartbeatResponse = Date.now();
+    heartbeatMissCount = 0;
+}
+
 function getWs() { return ws; }
 
 module.exports = {
-    connect, cleanup, getWs,
+    connect, cleanup, resetState, getWs,
     sendMsg, sendMsgAsync,
     getUserState,
     networkEvents,

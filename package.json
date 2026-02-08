@@ -9,9 +9,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "electron:dev": "vite build && electron .",
+    "electron:dev": "vite build && chcp 65001 >nul && electron .",
     "electron:build": "vite build && electron-builder",
-    "cli": "node client.js"
+    "cli": "chcp 65001 >nul && node client.js"
   },
   "dependencies": {
     "long": "^5.3.2",
