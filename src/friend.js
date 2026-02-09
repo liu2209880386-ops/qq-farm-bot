@@ -40,6 +40,15 @@ const HELP_ONLY_WITH_EXP = true;
 // 配置: 是否启用放虫放草功能
 const ENABLE_PUT_BAD_THINGS = false;  // 暂时关闭放虫放草功能
 
+// 功能开关（由 bot.js 通过 setter 控制）
+let enableSteal = true;
+let enableHelp = true;
+
+function setFriendFeatures(features) {
+    if (features.autoSteal !== undefined) enableSteal = features.autoSteal !== false;
+    if (features.friendHelp !== undefined) enableHelp = features.friendHelp !== false;
+}
+
 // ============ 好友 API ============
 
 async function getAllFriends() {
@@ -352,8 +361,8 @@ async function visitFriend(friend, totalActions, myGid) {
     // 执行操作
     const actions = [];
 
-    // 帮助操作: 只在有经验时执行 (如果启用了 HELP_ONLY_WITH_EXP)
-    if (status.needWeed.length > 0) {
+    // 帮助操作: 只在开关开启且有经验时执行
+    if (enableHelp && status.needWeed.length > 0) {
         const shouldHelp = !HELP_ONLY_WITH_EXP || canGetExp(10005);  // 10005=除草
         if (shouldHelp) {
             let ok = 0;
@@ -365,7 +374,7 @@ async function visitFriend(friend, totalActions, myGid) {
         }
     }
 
-    if (status.needBug.length > 0) {
+    if (enableHelp && status.needBug.length > 0) {
         const shouldHelp = !HELP_ONLY_WITH_EXP || canGetExp(10006);  // 10006=除虫
         if (shouldHelp) {
             let ok = 0;
@@ -377,7 +386,7 @@ async function visitFriend(friend, totalActions, myGid) {
         }
     }
 
-    if (status.needWater.length > 0) {
+    if (enableHelp && status.needWater.length > 0) {
         const shouldHelp = !HELP_ONLY_WITH_EXP || canGetExp(10007);  // 10007=浇水
         if (shouldHelp) {
             let ok = 0;
@@ -389,8 +398,8 @@ async function visitFriend(friend, totalActions, myGid) {
         }
     }
 
-    // 偷菜: 始终执行
-    if (status.stealable.length > 0) {
+    // 偷菜: 开关开启时执行
+    if (enableSteal && status.stealable.length > 0) {
         let ok = 0;
         const stolenPlants = [];
         for (let i = 0; i < status.stealable.length; i++) {
@@ -646,5 +655,5 @@ async function acceptFriendsWithRetry(gids) {
 
 module.exports = {
     checkFriends, startFriendCheckLoop, stopFriendCheckLoop,
-    checkAndAcceptApplications,
+    checkAndAcceptApplications, setFriendFeatures,
 };

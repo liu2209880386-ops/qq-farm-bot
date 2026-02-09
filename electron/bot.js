@@ -11,7 +11,7 @@ const { CONFIG } = require('../src/config');
 const { loadProto } = require('../src/proto');
 const { connect, cleanup, resetState, getWs, getUserState, networkEvents } = require('../src/network');
 const { startFarmCheckLoop, stopFarmCheckLoop, setOverrideSeedId, setPlantStrategy, getShopCache, clearShopCache } = require('../src/farm');
-const { startFriendCheckLoop, stopFriendCheckLoop } = require('../src/friend');
+const { startFriendCheckLoop, stopFriendCheckLoop, setFriendFeatures } = require('../src/friend');
 const { initTaskSystem, cleanupTaskSystem } = require('../src/task');
 const { initStatusBar, cleanupStatusBar, setStatusPlatform, statusData, setElectronMode } = require('../src/status');
 const { startSellLoop, stopSellLoop } = require('../src/warehouse');
@@ -48,6 +48,13 @@ async function init() {
     botEvents.emit('log', entry);
   });
 
+  // 监听状态变化（经验/金币/升级），推送到 UI
+  networkEvents.on('stateChanged', () => {
+    if (isConnected) {
+      botEvents.emit('status-update', getStatus());
+    }
+  });
+
   // 监听被踢下线事件，自动断开清理
   networkEvents.on('kicked', () => {
     stopFarmCheckLoop();
@@ -73,6 +80,8 @@ async function init() {
   if (config.plantMode === 'fast' || config.plantMode === 'advanced') {
     setPlantStrategy(config.plantMode);
   }
+
+  setFriendFeatures(config.features);
 }
 
 // ============ 连接 ============
@@ -211,6 +220,7 @@ function setFeatureEnabled(feature, enabled) {
       const anyFriendOn = friendFeatures.some(f => features[f] !== false);
       if (anyFriendOn) startFriendCheckLoop();
       else stopFriendCheckLoop();
+      setFriendFeatures({ [feature]: enabled });
     }
 
     if (feature === 'autoTask') {

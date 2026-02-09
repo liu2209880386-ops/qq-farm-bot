@@ -196,9 +196,11 @@ function handleNotify(msg) {
                     if (id === 1101) {
                         userState.exp = count;
                         updateStatusLevel(userState.level, count);
+                        networkEvents.emit('stateChanged');
                     } else if (id === 1) {
                         userState.gold = count;
                         updateStatusGold(count);
+                        networkEvents.emit('stateChanged');
                     }
                 }
             } catch (e) { }
@@ -224,6 +226,7 @@ function handleNotify(msg) {
                     if (userState.level !== oldLevel) {
                         log('系统', `升级! Lv${oldLevel} → Lv${userState.level}`);
                     }
+                    networkEvents.emit('stateChanged');
                 }
             } catch (e) { }
             return;
