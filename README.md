@@ -176,3 +176,11 @@ qq-farm-bot/
 ## License
 
 [MIT](LICENSE)
+
+---
+
+<div align="center">
+
+[![Star History Chart](https://api.star-history.com/svg?repos=QianChenJun/qq-farm-bot&type=Date)](https://star-history.com/#QianChenJun/qq-farm-bot&Date)
+
+</div>
